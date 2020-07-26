@@ -1,0 +1,33 @@
+---
+- hosts: centos
+  become: yes
+  vars:
+    pkg: httpd
+  tasks:
+    - name: if debian family install apache
+      when: ansible_os_family == "RedHat"
+      package:
+        name: "{{pkg}}"
+        update_cache: yes
+        state: present
+    - debug:
+        msg: httpd installed in centos machines
+      notify:
+        - start service
+    - name: creating a html file
+      file:
+        state: touch
+        path: /var/www/html/ravi
+    - name: adding script to file
+      lineinfile:
+        state: present
+        dest: /var/www/html/ravi
+        line: "                                         I AM THE KING OF ALL"
+      register: result
+    - debug:
+        var: result
+  handlers:
+    - name: start service
+      service:
+        name: httpd
+        state: restarted
